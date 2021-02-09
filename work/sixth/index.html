@@ -26,6 +26,61 @@
       // .keyup() 文字入力後に発火されるイベントです。
       // .replace(/\s+/g,'').length 改行を含まない文字数を取得します。
       // .val() input要素のvalueを取得します。
+      // $(function() {
+      //   var $input = $('.input');
+      //   var $resetCount = $('.rest-count');
+      //   var MAX_LETTERS = 30;
+
+      //   $input.on('keyup', function() {
+      //     var value = $(this).val();
+      //     var strLength = value.replace(/\s+/g, '').length;
+      //     if (MAX_LETTERS < strLength) {
+      //       $restCount.addClass('red');
+      //     } else {
+      //       $restCount.removeClass('red');
+      //     }
+      //     $resetCount.text(MAX_LETTERS - strLength);
+      //   });
+      // });
+
+      function Input() {
+        this.$input = $('.input');
+        this.$restCount = $('.rest-count');
+        this.MAX_LETTERS = 30;
+        this.bind();
+      }
+
+      // 入力時の処理
+      Input.prototype.bind = function() {
+        this.$input.on('keyup', this.wordCount.bind(this));
+      }
+
+      // 文字数の割り出し処理
+      Input.prototype.wordCount = function(e) {
+        this.value = $(e.target).val();
+        console.log(this.value);
+        console.log(this.value.length);
+      }
+
+      // 判定と処理
+      Input.prototype.checkLength = function() {
+        if (this.MAX_LETTERS < strLength) {
+          $restCount.addClass('red');
+        } else {
+          $restCount.removeClass('red');
+        }
+        this.changeCount(strLength);
+      }
+
+      // カウントの変更処理
+      Input.prototype.changeCount = function(strLength) {
+        this.$restCount.text(this.MAX_LETTERS - this.strLength);
+      }
+
+      $(function() {
+        var input = new Input();
+      });
+
     </script>
   </body>
 </html>

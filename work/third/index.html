@@ -25,18 +25,21 @@
     <script src="../../common/js/jquery.js"></script>
     <script>
       // 今回やるのはタブメニューです。
-      // $(function() {
-      //   // navの小要素であるliをクリックして、contents内の小要素であるli要素を表示させる。
-      //   $('.nav').find('li').click(function() {
-      //     // .index() 要素のindexを取得します。
-      //     var num = $(this).index();
-      //     // .eq() 引数に応じたindexの要素を指定します。
-      //     // .addClass() クラスを追加します。
-      //     $('.contents').find('li').addClass('is-hidden')
-      //     // .removeClass() クラスを削除します。
-      //     $('.contents').find('li').eq(num).removeClass('is-hidden');
-      //   });
-      // });
+
+      $(function() {
+        // navの小要素であるliをクリックして、contents内の小要素であるli要素を表示させる。
+        $('.nav').find('li').click(function() {
+          // .index() 要素のindexを取得します。
+          var num = $(this).index();
+          // .eq() 引数に応じたindexの要素を指定します。
+          // .addClass() クラスを追加します。
+          $('.contents').find('li').addClass('is-hidden')
+          // .removeClass() クラスを削除します。
+          $('.contents').find('li').eq(num).removeClass('is-hidden');
+        });
+      });
+
+      // ----------------------------------------
 
       // $(function() {
       //   var $navItem = $('.nav').find('li');
@@ -53,33 +56,33 @@
 
       // ----------------------------------------
 
-      // クラス宣言 と DOMとの紐付け
-      function Tab() {
-        this.$navItem = $('.nav').find('li');
-        this.$contentsItem = $('.contents').find('li');
-        this.bind();
-      }
+      // // クラス宣言 と DOMとの紐付け
+      // function Tab() {
+      //   this.$navItem = $('.nav').find('li');
+      //   this.$contentsItem = $('.contents').find('li');
+      //   this.bind();
+      // }
 
-      // クリックされたらselectIndexを呼ぶを呼ぶ
-      Tab.prototype.bind = function() {
-        this.$navItem.on('click', this.selectIndex.bind(this));
-      }
+      // // クリックされたらselectIndexを呼ぶを呼ぶ
+      // Tab.prototype.bind = function() {
+      //   this.$navItem.on('click', this.selectIndex.bind(this));
+      // }
 
-      // eventからクリックされたindexを特定、showTabにindexを渡す。
-      Tab.prototype.selectIndex = function(e) {
-        var index = $(e.target).index();
-        this.showTab(index);
-      }
+      // // eventからクリックされたindexを特定、showTabにindexを渡す。
+      // Tab.prototype.selectIndex = function(e) {
+      //   var index = $(e.target).index();
+      //   this.showTab(index);
+      // }
 
-      // タブの切り替え処理
-      Tab.prototype.showTab = function(index) {
-        this.$contentsItem.addClass('is-hidden').eq(index).removeClass('is-hidden');
-      }
+      // // タブの切り替え処理
+      // Tab.prototype.showTab = function(index) {
+      //   this.$contentsItem.addClass('is-hidden').eq(index).removeClass('is-hidden');
+      // }
 
-      $(function() {
-        // Tabクラスのインスタンス化
-        var tab = new Tab();
-      })
+      // $(function() {
+      //   // Tabクラスのインスタンス化
+      //   var tab = new Tab();
+      // })
 
     </script>
   </body>

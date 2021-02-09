@@ -81,6 +81,7 @@ $(function() {
   $('#q3').click(fadeOut);
   function fadeOut() {
     $(this).fadeOut(2000);
+    // fadeOut([speed], [callback])
   }
   // 第4問  id='q4'の要素をクリックしたらこの要素の前後とこの要素内の前後にテキストを挿入せよ。
   $('#q4').click(function() {
@@ -91,8 +92,8 @@ $(function() {
   });
   // 第5問  id='q5'の要素をクリックしたらこの要素にlargeというクラスを付与せよ。
   $('#q5').click(function() {
-    $(this).addClass('large')
-  })
+    $(this).addClass('large');
+  });
   // 第6問  id='q6'の要素をクリックしたらこの要素を2秒かけてmargin-topとmargin-leftを100pxの位置に移動させよ。
   $('#q6').click(function() {
     $(this).animate({
@@ -100,9 +101,12 @@ $(function() {
       'marginTop': 100
     }, 2000);
   });
+  // 対象要素.animate( CSSプロパティ, duration, easing, 関数(コールバック) )
+
   // 第7問  id='q7'の子要素をクリックしたら、その要素のインデックス（何番目か）をconsole.log()とalert()を用いて表示させよ。
   $('#q7').find('li').click(function() {
     var targetNum = $(this).index();
+    // console.log($(this))
     console.log(targetNum);
     alert(targetNum);
   });
@@ -112,9 +116,12 @@ $(function() {
   }, function() {
     $(this).removeClass('large');
   });
+  // hover(ホバー時の処理, ホバー外した時の処理)
+
   // 第9問  id='q9'の要素をクリックしたらこの要素に設定してあるdata属性をconsoleに表示せよ。
   $('#q9').click(function() {
     var text = $(this).data('text');
+    // console.log($(this));
     console.log(text);
   });
   // 第10問 id='q10'の子要素をクリックしたら、その要素のインデックスと等しいid='q11'の子要素にlargeというクラスを追加せよ。

@@ -63,8 +63,10 @@
           function() {
             var num = $(this).index();
             $(list).eq(num).stop().slideDown();
+            // $(list).eq(num).slideDown();
           }, function() {
             $(list).stop().slideUp();
+            // $(list).slideUp();
           }
         );
       });
