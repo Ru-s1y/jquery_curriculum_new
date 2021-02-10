@@ -28,6 +28,128 @@
     <script src="../../common/js/jquery.js"></script>
     <script src="./js/appid.js"></script>
     <script>
+      // 初期値
+      var page = 1;
+      var currentText = '';
+      var inputText = '';
+
+      // 商品リストの表示
+      function BookView(item) {
+        bookView = `
+          <li class="lists__item">
+            <div class="lists__item__inner">
+              <a href="${item.Item.itemUrl}" class="lists__item__link" target="_blank">
+                <img src="${item.Item.largeImageUrl}" class="lists__item__img" alt="${item.Item.title}">
+                <p class="lists__item__detail">作品名：${item.Item.title}</p>
+                <p class="lists__item__detail">作者　：${item.Item.author}</p>
+                <p class="lists__item__detail">出版社：${item.Item.publisherName}</p>
+              </a>
+            </div>
+          </li>
+        `;
+        $('.lists').append(bookView);
+      }
+
+      // 検索結果が見つからない時
+      function ErrorMessage() {
+        errorMessage = '<p class="error-message">検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</p>';
+        $('.message').append(errorMessage);
+      }
+
+      // ページャの表示
+      function PagerView(pageCount) {
+        pagerView = `
+          <div class="pager" data-js="pager">
+            <div class="counter">
+              <span class="counter-current">${page}</span>/<span class="counter-all">${pageCount}</span>
+            </div>
+            <div class="btn-wrapper">
+              <a class="btn-item" data-js="page-prev" href="">前へ</a>
+              <a class="btn-item" data-js="page-next" href="">次へ</a>
+            </div>
+          </div>
+        `;
+        $('.lists').after(pagerView);
+        if (page == 1) {
+          $('.btn-wrapper a').eq(0).addClass('disabled');
+        }
+        if (pageCount <= 1) {
+          $('.btn-wrapper a').addClass('disabled');
+        }
+        if (page == pageCount) {
+          $('.btn-wrapper a').eq(1).addClass('disabled');
+        }
+        ClickPager(pageCount);
+      }
+
+      // APIリクエスト
+      function RequestApi(text) {
+        // 初期化
+        $('.message').children().remove();
+        $('.lists').children().remove();
+        $('.pager').remove();
+
+        // Ajax通信
+        $.ajax({
+          url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
+          type: 'GET',
+          datatype: 'json',
+          data: {
+            // 「区分:サービス固有パラメーター」を確認して、必要な情報をdata内に入れましょう。
+            applicationId: appId, // (今回はこの変数をIDとして使用します) ※メンターから別途渡されるファイルを読み込んでください。
+            keyword: text,
+            hits: 20,
+            page: page,
+            booksGenreId: '001'
+          },
+        }).done(function(data) {
+          if (data.hits > 0) {
+              $('.lists').show();
+              if (data.pageCount > 1) {
+                var pagerView = new PagerView(data.pageCount);
+              }
+              $.each(data.Items, function(i, item) {
+                var bookData = new BookView(item);
+              });
+            } else {
+              var errorMessage = new ErrorMessage();
+            }
+        })
+      }
+
+      // ページャをクリックした時の処理
+      function ClickPager(pageCount) {
+        // クリックイベント(前へ)
+        $('.btn-wrapper a').eq(0).click(function(e) {
+          e.preventDefault();
+          if (page > 1) {
+            page -= 1;
+            RequestApi(currentText);
+          }
+        });
+        // クリックイベント(次へ)
+        $('.btn-wrapper a').eq(1).click(function(e) {
+          e.preventDefault();
+          if (page != pageCount) {
+            page += 1;
+            RequestApi(currentText);
+          }
+        });
+      }
+
+      // ready
+      $(function() {
+        // クリックイベント(検索)
+        $('.search__btn').on('click', function() {
+          inputText = $('.search__text__input').val();
+          currentText = inputText;
+          page = 1;
+          // インスタンス作成(APIリクエスト)
+          var requestApi = new RequestApi(currentText);
+        });
+      });
+
+      // ----- コメント -----
       // 楽天ブックスの総合検索APIを使って製作してください。
       // answerの挙動を良く見てね！
       //
@@ -87,130 +209,6 @@
       //     <a class="btn-item" data-js="page-next" href="">次へ</a>
       //   </div>
       // </div>
-
-
-      // 商品リストの表示
-      function BookView(item) {
-        this.bookView = `
-          <li class="lists__item">
-            <div class="lists__item__inner">
-              <a href="${item.Item.itemUrl}" class="lists__item__link" target="_blank">
-                <img src="${item.Item.largeImageUrl}" class="lists__item__img" alt="${item.Item.title}">
-                <p class="lists__item__detail">作品名：${item.Item.title}</p>
-                <p class="lists__item__detail">作者　：${item.Item.author}</p>
-                <p class="lists__item__detail">出版社：${item.Item.publisherName}</p>
-              </a>
-            </div>
-          </li>
-        `;
-        $('.lists').append(this.bookView);
-      }
-
-      // 検索結果が見つからない時
-      function ErrorMessage() {
-        this.errorMessage = '<p class="error-message">検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</p>';
-        $('.message').append(this.errorMessage);
-      }
-
-      // ページャの表示
-      function PagerView(page, pageCount) {
-        this.pagerView = `
-          <div class="pager" data-js="pager">
-            <div class="counter">
-              <span class="counter-current">${page}</span>/<span class="counter-all">${pageCount}</span>
-            </div>
-            <div class="btn-wrapper">
-              <a class="btn-item" data-js="page-prev" href="">前へ</a>
-              <a class="btn-item" data-js="page-next" href="">次へ</a>
-            </div>
-          </div>
-        `;
-        $('.lists').after(this.pagerView);
-        if (page == 1) {
-          $('.btn-wrapper a:first').addClass('disabled')
-        }
-        if (pageCount <= 1) {
-          $('.btn-wrapper a').addClass('disabled')
-        }
-      }
-
-      // APIリクエスト
-      function RequestApi(page) {
-        var inputText = $('.search__text__input').val();
-        $.ajax({
-          url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
-          type: 'GET',
-          datatype: 'json',
-          data: {
-            // 「区分:サービス固有パラメーター」を確認して、必要な情報をdata内に入れましょう。
-            applicationId: appId, // (今回はこの変数をIDとして使用します) ※メンターから別途渡されるファイルを読み込んでください。
-            keyword: inputText,
-            hits: 20,
-            page: page,
-            booksGenreId: '001'
-          },
-        }).done(function(data) {
-          if (data.hits > 0) {
-              // ここから
-              $('.lists').show();
-              if (data.pageCount > 1) {
-                var pagerView = new PagerView(data.page, data.pageCount);
-              }
-              $.each(data.Items, function(i, item) {
-                var bookData = new BookView(item)
-              });
-            } else {
-              console.log("データがありません。")
-              var errorMessage = new ErrorMessage();
-            }
-        })
-      }
-
-      // クリック処理
-      function clickPager(page) {
-        // 前へのクリック処理
-        $('.btn-wrapper a:first').on('click', function() {
-          if (page <= 1) {
-            console.log("前のページがありません。");
-            e.preventDefault();
-            return false;
-          } else {
-            page -= 1;
-            RequestApi(page);
-          }
-        });
-        
-        // 次へのクリック処理
-        $('.btn-wrapper a:last').on('click', function() {
-          var pageTotal = $('.counter-all').text();
-          console.log(page);
-          alert(pageTotal);
-          if(page == pageTotal) {
-            console.log("次のページがありません。");
-            e.preventDefault();
-            return false;
-          } else {
-            this.page += 1;
-            RequestApi(page);
-          }
-        });
-
-      }
-
-      $(function() {
-        var page = 1;
-
-        // クリックイベント
-        $('.search__btn').on('click', function() {
-          // 初期化
-          $('.message').children().remove();
-          $('.lists').children().remove();
-          $('.pager').remove();
-          // APIへリクエスト
-          var requestApi = new RequestApi(page);
-        });
-
-      });
     </script>
   </body>
 </html>

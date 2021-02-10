@@ -58,16 +58,21 @@
       // .stop() 現在動作中のアニメーション処理を全て中止します。
       $(function() {
         var $menu = $('.menu__list');
-        var $list = $('.menu__list__childList');
         $($menu.children()).hover(
           function() {
-            var num = $(this).index();
-            $list.eq(num).stop().slideDown();
+            // $(this).children().next().stop().slideDown();
+            $(this).children('ul').stop().slideDown();
+            // next() 指定した要素の次の要素をとる
           }, function() {
-            $list.stop().slideUp();
+            $(this).children().next().stop().slideUp();
           }
         );
       });
+
+      // next() 指定した次の要素
+      // $(this).children().next().stop().slideDown();
+      // 上記だとなぜか一つ目のpタグと二つ目のulタグが取れる
+
       // hover(第１引数, 第2引数)
       // 第１引数 ホバーした時の処理
       // 第２引数 ホバーが外れた時の処理
