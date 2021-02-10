@@ -120,7 +120,7 @@
       // ページャをクリックした時の処理
       function ClickPager(pageCount) {
         // クリックイベント(前へ)
-        $('.btn-wrapper a').eq(0).click(function(e) {
+        $('.btn-wrapper a').eq(0).on('click', function(e) {
           e.preventDefault();
           if (page > 1) {
             page -= 1;
@@ -128,7 +128,7 @@
           }
         });
         // クリックイベント(次へ)
-        $('.btn-wrapper a').eq(1).click(function(e) {
+        $('.btn-wrapper a').eq(1).on('click', function(e) {
           e.preventDefault();
           if (page != pageCount) {
             page += 1;
@@ -140,6 +140,7 @@
       // ready
       $(function() {
         // クリックイベント(検索)
+        // $('.search__btn').click(function() {
         $('.search__btn').on('click', function() {
           inputText = $('.search__text__input').val();
           currentText = inputText;
