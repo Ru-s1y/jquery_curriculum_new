@@ -85,7 +85,7 @@
             $('.btn-item').addClass('disabled');
           }
         });
-        ClickPager(pageCount);
+        // ClickPager(pageCount);
       }
 
       // APIリクエスト
@@ -158,7 +158,7 @@
           var requestApi = new RequestApi(currentText);
         });
 
-        // ----------------------------------------------
+        // クリックイベント(pager)
         $.each($('.btn-item'), function(i, element) {
           var data = element.data('js');
           if (data === 'page-prev') {
