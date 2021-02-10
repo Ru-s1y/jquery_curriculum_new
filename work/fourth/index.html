@@ -57,16 +57,14 @@
       // .children() 要素の子要素を取得します。
       // .stop() 現在動作中のアニメーション処理を全て中止します。
       $(function() {
-        var menu = $('.menu__list');
-        var list = $('.menu__list__childList');
-        $(menu.children()).hover(
+        var $menu = $('.menu__list');
+        var $list = $('.menu__list__childList');
+        $($menu.children()).hover(
           function() {
             var num = $(this).index();
-            $(list).eq(num).stop().slideDown();
-            // $(list).eq(num).slideDown();
+            $list.eq(num).stop().slideDown();
           }, function() {
-            $(list).stop().slideUp();
-            // $(list).slideUp();
+            $list.stop().slideUp();
           }
         );
       });

@@ -153,7 +153,9 @@
           if (data.hits > 0) {
               // ここから
               $('.lists').show();
-              var pagerView = new PagerView(data.page, data.pageCount);
+              if (data.pageCount > 1) {
+                var pagerView = new PagerView(data.page, data.pageCount);
+              }
               $.each(data.Items, function(i, item) {
                 var bookData = new BookView(item)
               });
@@ -164,8 +166,36 @@
         })
       }
 
-      // 前へのクリック処理
-      // 次へのクリック処理
+      // クリック処理
+      function clickPager(page) {
+        // 前へのクリック処理
+        $('.btn-wrapper a:first').on('click', function() {
+          if (page <= 1) {
+            console.log("前のページがありません。");
+            e.preventDefault();
+            return false;
+          } else {
+            page -= 1;
+            RequestApi(page);
+          }
+        });
+        
+        // 次へのクリック処理
+        $('.btn-wrapper a:last').on('click', function() {
+          var pageTotal = $('.counter-all').text();
+          console.log(page);
+          alert(pageTotal);
+          if(page == pageTotal) {
+            console.log("次のページがありません。");
+            e.preventDefault();
+            return false;
+          } else {
+            this.page += 1;
+            RequestApi(page);
+          }
+        });
+
+      }
 
       $(function() {
         var page = 1;
