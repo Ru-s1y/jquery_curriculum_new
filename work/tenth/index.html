@@ -32,6 +32,7 @@
       var page = 1;
       var currentText = '';
       var inputText = '';
+      $('.lists').css('fontSize', '0');
 
       // 商品リストの表示
       function BookView(item) {
@@ -95,8 +96,7 @@
           type: 'GET',
           datatype: 'json',
           data: {
-            // 「区分:サービス固有パラメーター」を確認して、必要な情報をdata内に入れましょう。
-            applicationId: appId, // (今回はこの変数をIDとして使用します) ※メンターから別途渡されるファイルを読み込んでください。
+            applicationId: appId,
             keyword: text,
             hits: 20,
             page: page,
@@ -104,16 +104,16 @@
           },
         }).done(function(data) {
           if (data.hits > 0) {
-              $('.lists').show();
-              if (data.pageCount > 1) {
-                var pagerView = new PagerView(data.pageCount);
-              }
-              $.each(data.Items, function(i, item) {
-                var bookData = new BookView(item);
-              });
-            } else {
-              var errorMessage = new ErrorMessage();
+            $('.lists').show();
+            if (data.pageCount >= 1) {
+              var pagerView = new PagerView(data.pageCount);
             }
+            $.each(data.Items, function(i, item) {
+              var bookData = new BookView(item);
+            });
+          } else {
+            var errorMessage = new ErrorMessage();
+          }
         })
       }
 
