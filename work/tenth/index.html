@@ -32,54 +32,59 @@
       var page = 1;
       var currentText = '';
       var inputText = '';
-      $('.lists').css('fontSize', '0');
 
       // 商品リストの表示
       function BookView(item) {
-        bookView = `
-          <li class="lists__item">
-            <div class="lists__item__inner">
-              <a href="${item.Item.itemUrl}" class="lists__item__link" target="_blank">
-                <img src="${item.Item.largeImageUrl}" class="lists__item__img" alt="${item.Item.title}">
-                <p class="lists__item__detail">作品名：${item.Item.title}</p>
-                <p class="lists__item__detail">作者　：${item.Item.author}</p>
-                <p class="lists__item__detail">出版社：${item.Item.publisherName}</p>
-              </a>
-            </div>
-          </li>
-        `;
+        bookView = '<li class="lists__item">' +
+                      '<div class="lists__item__inner">' +
+                        '<a href="' + item.Item.itemUrl + '" class="lists__item__link" target="_blank">' +
+                          '<img src="' + item.Item.largeImageUrl + '" class="lists__item__img" alt="' + item.Item.title + '">' +
+                          '<p class="lists__item__detail">作品名：' + item.Item.title + '</p>' +
+                          '<p class="lists__item__detail">作者　：' + item.Item.author + '</p>' +
+                          '<p class="lists__item__detail">出版社：' + item.Item.publisherName + '</p>' +
+                        '</a>' +
+                      '/div' +
+                    '</li>';
         $('.lists').append(bookView);
       }
 
       // 検索結果が見つからない時
-      function ErrorMessage() {
-        errorMessage = '<p class="error-message">検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</p>';
+      function ErrorMessage(message) {
+        errorMessage = '<p class="error-message">' + message + '</p>';
         $('.message').append(errorMessage);
       }
 
       // ページャの表示
       function PagerView(pageCount) {
-        pagerView = `
-          <div class="pager" data-js="pager">
-            <div class="counter">
-              <span class="counter-current">${page}</span>/<span class="counter-all">${pageCount}</span>
-            </div>
-            <div class="btn-wrapper">
-              <a class="btn-item" data-js="page-prev" href="">前へ</a>
-              <a class="btn-item" data-js="page-next" href="">次へ</a>
-            </div>
-          </div>
-        `;
+        pagerView = '<div class="pager" data-js="pager">' +
+                      '<div class="counter">' +
+                        '<span class="counter-current">' + page + '</span>/<span class="counter-all">' + pageCount + '</span>' +
+                      '</div>' +
+                      '<div class="btn-wrapper">' +
+                        '<a class="btn-item" data-js="page-prev" href="">前へ</a>' +
+                        '<a class="btn-item" data-js="page-next" href="">次へ</a>' +
+                      '</div>' +
+                    '</div>';
         $('.lists').after(pagerView);
-        if (page == 1) {
-          $('.btn-wrapper a').eq(0).addClass('disabled');
-        }
-        if (pageCount <= 1) {
-          $('.btn-wrapper a').addClass('disabled');
-        }
-        if (page == pageCount) {
-          $('.btn-wrapper a').eq(1).addClass('disabled');
-        }
+        // eq() => data() 今後ボタンが追加された時のことを考えてdataで指定する
+        $.each($('.btn-item'), function(i, element) {
+          var data = $element.data('js');
+          if (data === 'page-prev') {
+            // １ページ目の時に"前へ"をdisabledに
+            if (page === 1) {
+              $(this).addClass('disabled');
+            }
+          } 
+          if (data === 'page-next') {
+            // 最終ページの時 "次へ" をdisabledに
+            if (page === pageCount) {
+              $(this).addClass('disabled');
+            }
+          }
+          if (pageCount <= 1) {
+            $('.btn-item').addClass('disabled');
+          }
+        });
         ClickPager(pageCount);
       }
 
@@ -112,41 +117,68 @@
               var bookData = new BookView(item);
             });
           } else {
-            var errorMessage = new ErrorMessage();
+            var errorMessage = new ErrorMessage("検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。");
           }
-        })
+        }).fail(function(data) {
+          if (data.responseJSON.error === "wrong_parameter") {
+            var errorMessage = new ErrorMessage("検索文字が入力されていません。");
+          }
+          console.log(data.responseJSON.error);
+        });
       }
 
       // ページャをクリックした時の処理
-      function ClickPager(pageCount) {
-        // クリックイベント(前へ)
-        $('.btn-wrapper a').eq(0).on('click', function(e) {
-          e.preventDefault();
-          if (page > 1) {
-            page -= 1;
-            RequestApi(currentText);
-          }
-        });
-        // クリックイベント(次へ)
-        $('.btn-wrapper a').eq(1).on('click', function(e) {
-          e.preventDefault();
-          if (page != pageCount) {
-            page += 1;
-            RequestApi(currentText);
-          }
-        });
-      }
+      // function ClickPager(pageCount) {
+      //   // クリックイベント(前へ)
+      //   $('.btn-wrapper a').eq(0).on('click', function(e) {
+      //     e.preventDefault();
+      //     if (page > 1) {
+      //       page -= 1;
+      //       RequestApi(currentText);
+      //     }
+      //   });
+      //   // クリックイベント(次へ)
+      //   $('.btn-wrapper a').eq(1).on('click', function(e) {
+      //     e.preventDefault();
+      //     if (page != pageCount) {
+      //       page += 1;
+      //       RequestApi(currentText);
+      //     }
+      //   });
+      // }
 
       // ready
       $(function() {
         // クリックイベント(検索)
-        // $('.search__btn').click(function() {
         $('.search__btn').on('click', function() {
           inputText = $('.search__text__input').val();
           currentText = inputText;
           page = 1;
           // インスタンス作成(APIリクエスト)
           var requestApi = new RequestApi(currentText);
+        });
+
+        // ----------------------------------------------
+        $.each($('.btn-item'), function(i, element) {
+          var data = element.data('js');
+          if (data === 'page-prev') {
+            data.on('click', function(e) {
+              e.preventDefault();
+              if (page > 1) {
+                page -= 1;
+                RequestApi(currentText);
+              }
+            });
+          }
+          if (data === 'page-next') {
+            data.on('click', function(e) {
+              e.preventDefault();
+              if (page !== pageCount) {
+                page += 1;
+                RequestApi(currentText);
+              }
+            });
+          }
         });
       });
 
