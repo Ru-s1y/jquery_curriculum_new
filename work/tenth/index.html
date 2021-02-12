@@ -65,24 +65,26 @@
                         '<a class="btn-item" data-js="page-next" href="">次へ</a>' +
                       '</div>' +
                     '</div>';
-        // 非アクティブ化処理
+        // ボタンの非アクティブ化処理
         $('.lists').after(pagerView);
         $.each($('.btn-item'), function(i, element) {
           var data = $(element).data('js');
-          if (data === 'page-prev') {
-            // １ページ目の時に"前へ"をdisabledに
-            if (page === 1) {
-              $(this).addClass('disabled');
-            }
-          } 
-          if (data === 'page-next') {
-            // 最終ページの時 "次へ" をdisabledに
-            if (page === pageCount) {
-              $(this).addClass('disabled');
-            }
-          }
-          if (pageCount <= 1) {
-            $('.btn-item').addClass('disabled');
+          switch (data) {
+            case 'page-prev':
+              if (page === 1) {
+                $(this).addClass('disabled');
+              }
+              break;
+            case 'page-next':
+              if (page === pageCount) {
+                $(this).addClass('disabled');
+              }
+              if (pageCount <= 1) {
+                $('.btn-item').addClass('disabled');
+              }
+              break;
+            default:
+              return;
           }
         });
       }
@@ -121,7 +123,8 @@
             ErrorMessage("検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。");
           }
         }).fail(function(data) {
-          var requestError = data.responseJSON
+          // エラー処理
+          var requestError = data.responseJSON;
           if (!requestError) {
             // オフライン時でjsonが返ってこなかった場合の処理
             ErrorMessage("通信に失敗しました。インターネットのご接続をご確認ください。");
@@ -153,6 +156,9 @@
               case 'service_unavailable':
                 ErrorMessage("メンテナンス中です。");
                 break;
+              default:
+                ErrorMessage("エラーが発生しました。サイト管理者にお問い合わせください。");
+
             }
           }
         });
@@ -187,6 +193,8 @@
                 page += 1;
                 break;
               // ここにpagerボタンを追加していく
+              default:
+                return;
             }
             RequestApi(currentText);
           }
