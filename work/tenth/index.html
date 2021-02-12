@@ -158,7 +158,6 @@
                 break;
               default:
                 ErrorMessage("エラーが発生しました。サイト管理者にお問い合わせください。");
-
             }
           }
         });
@@ -172,7 +171,6 @@
           inputText = $('.search__text__input').val();
           currentText = inputText;
           page = 1;
-          // インスタンス作成(APIリクエスト)
           RequestApi(currentText);
         });
 
