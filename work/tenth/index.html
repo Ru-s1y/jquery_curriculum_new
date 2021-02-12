@@ -32,7 +32,6 @@
       var page = 1;
       var currentText = '';
       var inputText = '';
-      var pageTotal = 1;
 
       // 商品リストの表示
       function BookView(item) {
@@ -66,8 +65,8 @@
                         '<a class="btn-item" data-js="page-next" href="">次へ</a>' +
                       '</div>' +
                     '</div>';
+        // 非アクティブ化処理
         $('.lists').after(pagerView);
-        // eq() => data() 今後ボタンが追加された時のことを考えてdataで指定する
         $.each($('.btn-item'), function(i, element) {
           var data = $(element).data('js');
           if (data === 'page-prev') {
@@ -108,23 +107,54 @@
             booksGenreId: '001'
           },
         }).done(function(data) {
+          // 成功処理
           if (data.hits > 0) {
             pageTotal = data.pageCount;
             $('.lists').show();
             if (data.pageCount >= 1) {
-              var pagerView = new PagerView(data.pageCount);
+              PagerView(data.pageCount);
             }
             $.each(data.Items, function(i, item) {
-              var bookData = new BookView(item);
+              BookView(item);
             });
           } else {
-            var errorMessage = new ErrorMessage("検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。");
+            ErrorMessage("検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。");
           }
         }).fail(function(data) {
-          if (data.responseJSON.error === "wrong_parameter") {
-            var errorMessage = new ErrorMessage("検索文字が入力されていません。");
+          var requestError = data.responseJSON
+          if (!requestError) {
+            // オフライン時でjsonが返ってこなかった場合の処理
+            ErrorMessage("通信に失敗しました。インターネットのご接続をご確認ください。");
+          } else {
+            // 以下レスポンスはあるがエラーの場合の処理
+            switch(requestError.error) {
+              case 'wrong_parameter':
+                if (requestError.error_description === "keyword parameter is not valid") {
+                  ErrorMessage("キーワードパラメータが無効です。");
+                  console.log("keyword parameter is not valid");
+                  break;
+                } else if (requestError.error_description === "keyword must be set") {
+                  ErrorMessage("検索結果が入力されていません。");
+                  console.log("keyword must be set");
+                  break;
+                } else {
+                  ErrorMessage("エラーが発生しました。サイト管理者にお問合せください。");
+                  break;
+                }
+              case 'too_many_requests':
+                ErrorMessage("リクエスト過多です。しばらく時間を置いてからお試しください。");
+                break;
+              case 'not_found':
+                ErrorMessage("対象のデータが存在しません。");
+                break;
+              case 'system_error':
+                ErrorMessage("システムエラーです。");
+                break;
+              case 'service_unavailable':
+                ErrorMessage("メンテナンス中です。");
+                break;
+            }
           }
-          // console.log(data.responseJSON.error);
         });
       }
 
@@ -137,24 +167,28 @@
           currentText = inputText;
           page = 1;
           // インスタンス作成(APIリクエスト)
-          var requestApi = new RequestApi(currentText);
+          RequestApi(currentText);
         });
 
         // クリックイベント(pager)
         $('.container').on('click', '.btn-wrapper a', function(e) {
           e.preventDefault();
-          var $pagerButton = $(this).data('js');
-          if ($pagerButton === 'page-prev') {
-            if (page > 1) {
-              page -= 1;
-              RequestApi(currentText);
+          // disabledのクラスを読み取る
+          if ($(this).hasClass('disabled')) {
+            // console.log("ボタンは非アクティブです。");
+            return;
+          } else {
+            var $pagerButton = $(this).data('js');
+            switch($pagerButton) {
+              case 'page-prev':
+                page -= 1;
+                break;
+              case 'page-next':
+                page += 1;
+                break;
+              // ここにpagerボタンを追加していく
             }
-          }
-          if ($pagerButton === 'page-next') {
-            if (page !== pageTotal) {
-              page += 1;
-              RequestApi(currentText);
-            }
+            RequestApi(currentText);
           }
         });
       });
