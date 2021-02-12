@@ -32,6 +32,7 @@
       var page = 1;
       var currentText = '';
       var inputText = '';
+      var pageTotal = 1;
 
       // 商品リストの表示
       function BookView(item) {
@@ -43,7 +44,7 @@
                           '<p class="lists__item__detail">作者　：' + item.Item.author + '</p>' +
                           '<p class="lists__item__detail">出版社：' + item.Item.publisherName + '</p>' +
                         '</a>' +
-                      '/div' +
+                      '</div>' +
                     '</li>';
         $('.lists').append(bookView);
       }
@@ -68,7 +69,7 @@
         $('.lists').after(pagerView);
         // eq() => data() 今後ボタンが追加された時のことを考えてdataで指定する
         $.each($('.btn-item'), function(i, element) {
-          var data = $element.data('js');
+          var data = $(element).data('js');
           if (data === 'page-prev') {
             // １ページ目の時に"前へ"をdisabledに
             if (page === 1) {
@@ -85,7 +86,6 @@
             $('.btn-item').addClass('disabled');
           }
         });
-        // ClickPager(pageCount);
       }
 
       // APIリクエスト
@@ -109,6 +109,7 @@
           },
         }).done(function(data) {
           if (data.hits > 0) {
+            pageTotal = data.pageCount;
             $('.lists').show();
             if (data.pageCount >= 1) {
               var pagerView = new PagerView(data.pageCount);
@@ -123,33 +124,14 @@
           if (data.responseJSON.error === "wrong_parameter") {
             var errorMessage = new ErrorMessage("検索文字が入力されていません。");
           }
-          console.log(data.responseJSON.error);
+          // console.log(data.responseJSON.error);
         });
       }
-
-      // ページャをクリックした時の処理
-      // function ClickPager(pageCount) {
-      //   // クリックイベント(前へ)
-      //   $('.btn-wrapper a').eq(0).on('click', function(e) {
-      //     e.preventDefault();
-      //     if (page > 1) {
-      //       page -= 1;
-      //       RequestApi(currentText);
-      //     }
-      //   });
-      //   // クリックイベント(次へ)
-      //   $('.btn-wrapper a').eq(1).on('click', function(e) {
-      //     e.preventDefault();
-      //     if (page != pageCount) {
-      //       page += 1;
-      //       RequestApi(currentText);
-      //     }
-      //   });
-      // }
 
       // ready
       $(function() {
         // クリックイベント(検索)
+        // $('.search__btn').click(function() {
         $('.search__btn').on('click', function() {
           inputText = $('.search__text__input').val();
           currentText = inputText;
@@ -159,25 +141,20 @@
         });
 
         // クリックイベント(pager)
-        $.each($('.btn-item'), function(i, element) {
-          var data = element.data('js');
-          if (data === 'page-prev') {
-            data.on('click', function(e) {
-              e.preventDefault();
-              if (page > 1) {
-                page -= 1;
-                RequestApi(currentText);
-              }
-            });
+        $('.container').on('click', '.btn-wrapper a', function(e) {
+          e.preventDefault();
+          var $pagerButton = $(this).data('js');
+          if ($pagerButton === 'page-prev') {
+            if (page > 1) {
+              page -= 1;
+              RequestApi(currentText);
+            }
           }
-          if (data === 'page-next') {
-            data.on('click', function(e) {
-              e.preventDefault();
-              if (page !== pageCount) {
-                page += 1;
-                RequestApi(currentText);
-              }
-            });
+          if ($pagerButton === 'page-next') {
+            if (page !== pageTotal) {
+              page += 1;
+              RequestApi(currentText);
+            }
           }
         });
       });
