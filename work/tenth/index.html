@@ -28,150 +28,134 @@
     <script src="../../common/js/jquery.js"></script>
     <script src="./js/appid.js"></script>
     <script>
-      // 初期値
-      var page = 1;
-      var currentText = '';
-      var inputText = '';
-
-      // 商品リストの表示
-      function BookView(item) {
-        bookView = '<li class="lists__item">' +
-                      '<div class="lists__item__inner">' +
-                        '<a href="' + item.Item.itemUrl + '" class="lists__item__link" target="_blank">' +
-                          '<img src="' + item.Item.largeImageUrl + '" class="lists__item__img" alt="' + item.Item.title + '">' +
-                          '<p class="lists__item__detail">作品名：' + item.Item.title + '</p>' +
-                          '<p class="lists__item__detail">作者　：' + item.Item.author + '</p>' +
-                          '<p class="lists__item__detail">出版社：' + item.Item.publisherName + '</p>' +
-                        '</a>' +
-                      '</div>' +
-                    '</li>';
-        $('.lists').append(bookView);
-      }
-
-      // 検索結果が見つからない時
-      function ErrorMessage(message) {
-        errorMessage = '<p class="error-message">' + message + '</p>';
-        $('.message').append(errorMessage);
-      }
-
-      // ページャの表示
-      function PagerView(pageCount) {
-        pagerView = '<div class="pager" data-js="pager">' +
-                      '<div class="counter">' +
-                        '<span class="counter-current">' + page + '</span>/<span class="counter-all">' + pageCount + '</span>' +
-                      '</div>' +
-                      '<div class="btn-wrapper">' +
-                        '<a class="btn-item" data-js="page-prev" href="">前へ</a>' +
-                        '<a class="btn-item" data-js="page-next" href="">次へ</a>' +
-                      '</div>' +
-                    '</div>';
-        // ボタンの非アクティブ化処理
-        $('.lists').after(pagerView);
-        $.each($('.btn-item'), function(i, element) {
-          var data = $(element).data('js');
-          switch (data) {
-            case 'page-prev':
-              if (page === 1) {
-                $(this).addClass('disabled');
-              }
-              break;
-            case 'page-next':
-              if (page === pageCount) {
-                $(this).addClass('disabled');
-              }
-              if (pageCount <= 1) {
-                $('.btn-item').addClass('disabled');
-              }
-              break;
-            default:
-              return;
-          }
-        });
-      }
-
-      // APIリクエスト
-      function RequestApi(text) {
-        // 初期化
-        $('.message').children().remove();
-        $('.lists').children().remove();
-        $('.pager').remove();
-
-        // Ajax通信
-        $.ajax({
-          url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
-          type: 'GET',
-          datatype: 'json',
-          data: {
-            applicationId: appId,
-            keyword: text,
-            hits: 20,
-            page: page,
-            booksGenreId: '001'
-          },
-        }).done(function(data) {
-          // 成功処理
-          if (data.hits > 0) {
-            pageTotal = data.pageCount;
-            $('.lists').show();
-            if (data.pageCount >= 1) {
-              PagerView(data.pageCount);
-            }
-            $.each(data.Items, function(i, item) {
-              BookView(item);
-            });
-          } else {
-            ErrorMessage("検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。");
-          }
-        }).fail(function(data) {
-          // エラー処理
-          var requestError = data.responseJSON;
-          if (!requestError) {
-            // オフライン時でjsonが返ってこなかった場合の処理
-            ErrorMessage("通信に失敗しました。インターネットのご接続をご確認ください。");
-          } else {
-            // 以下レスポンスはあるがエラーの場合の処理
-            switch(requestError.error) {
-              case 'wrong_parameter':
-                if (requestError.error_description === "keyword parameter is not valid") {
-                  ErrorMessage("キーワードパラメータが無効です。");
-                  console.log("keyword parameter is not valid");
-                  break;
-                } else if (requestError.error_description === "keyword must be set") {
-                  ErrorMessage("検索結果が入力されていません。");
-                  console.log("keyword must be set");
-                  break;
-                } else {
-                  ErrorMessage("エラーが発生しました。サイト管理者にお問合せください。");
-                  break;
-                }
-              case 'too_many_requests':
-                ErrorMessage("リクエスト過多です。しばらく時間を置いてからお試しください。");
-                break;
-              case 'not_found':
-                ErrorMessage("対象のデータが存在しません。");
-                break;
-              case 'system_error':
-                ErrorMessage("システムエラーです。");
-                break;
-              case 'service_unavailable':
-                ErrorMessage("メンテナンス中です。");
-                break;
-              default:
-                ErrorMessage("エラーが発生しました。サイト管理者にお問い合わせください。");
-            }
-          }
-        });
-      }
-
       // ready
       $(function() {
+        // 初期値
+        var page = 1;
+        var inputText = '';
+
+        // 商品リストの表示
+        function BookView(Items) {
+          var bookView = '';
+          $.each(Items, function(i, item) {
+            bookView += 
+              '<li class="lists__item">' +
+                '<div class="lists__item__inner">' +
+                  '<a href="' + item.Item.itemUrl + '" class="lists__item__link" target="_blank">' +
+                    '<img src="' + item.Item.largeImageUrl + '" class="lists__item__img" alt="' + item.Item.title + '">' +
+                    '<p class="lists__item__detail">作品名：' + item.Item.title + '</p>' +
+                    '<p class="lists__item__detail">作者　：' + item.Item.author + '</p>' +
+                    '<p class="lists__item__detail">出版社：' + item.Item.publisherName + '</p>' +
+                  '</a>' +
+                '</div>' +
+              '</li>';
+          });
+          $('.lists').append(bookView);
+        }
+
+        // 検索結果が見つからない時
+        function ErrorMessage(message) {
+          $('.message').children().remove();
+          var errorMessage = '<p class="error-message">' + message + '</p>';
+          $('.message').append(errorMessage);
+        }
+
+        // ページャの表示
+        function PagerView(pageCount) {
+          var pagerView = '<div class="pager" data-js="pager">' +
+                            '<div class="counter">' +
+                              '<span class="counter-current">' + page + '</span>/<span class="counter-all">' + pageCount + '</span>' +
+                            '</div>' +
+                            '<div class="btn-wrapper">' +
+                              '<a class="btn-item" data-js="page-prev" href="">前へ</a>' +
+                              '<a class="btn-item" data-js="page-next" href="">次へ</a>' +
+                            '</div>' +
+                          '</div>';
+          $('.lists').after(pagerView);
+          PagerButton(pageCount);
+        }
+
+        // ボタンの非アクティブ化処理
+        function PagerButton(pageCount) {
+          // 総ページ数が1ページの場合disabled (page=1 && pageCount=1)
+          if (pageCount === 1) {
+            // console.log("1/1ページ");
+            $('.btn-item').addClass('disabled');
+          } else if (page === 1) {
+            // console.log("1ページ目:");
+            $('a[data-js="page-prev"]').addClass('disabled');
+          }　else if (page === pageCount) {
+            // console.log("最終ページ:");
+            $('a[data-js="page-next"]').addClass('disabled');
+          }
+        }
+
+        // APIリクエスト
+        function RequestApi() {
+          // 初期化
+          $('.message').children().remove();
+          $('.lists').children().remove();
+          $('.pager').remove();
+
+          // Ajax通信
+          $.ajax({
+            url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
+            type: 'GET',
+            datatype: 'json',
+            data: {
+              applicationId: appId,
+              keyword: inputText,
+              hits: 20,
+              page: page,
+              booksGenreId: '001'
+            },
+          }).done(function(data) {
+            // 成功処理
+            if (data.hits > 0) {
+              PagerView(data.pageCount);
+              BookView(data.Items);
+            } else {
+              // ヒットしない時
+              ErrorMessage("検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。");
+            }
+          }).fail(function(data) {
+            // エラー処理
+            CheckErrorStatus(data.status);
+          });
+        }
+
+        // エラーメッセージ集
+        function CheckErrorStatus(status) {
+          switch (status) {
+            case 0:
+              ErrorMessage("通信に失敗しました。インターネットのご接続をご確認ください。");
+              break;
+            case 400:
+              ErrorMessage("検索結果が入力されていません。");
+              break;
+            case 404:
+              ErrorMessage("エラーが発生しました。サイト管理者にお問合せください。");
+              break;
+            case 429:
+              ErrorMessage("リクエスト過多です。しばらく時間を置いてからお試しください。");
+              break;
+            case 500:
+              ErrorMessage("システムエラーが発生しました。しばらく時間を置いてからお試しください。");
+              break;
+            case 503:
+              ErrorMessage("メンテナンス中です。しばらく時間を置いてからお試しください。");
+              break;
+            default:
+              ErrorMessage("エラーが発生しました。サイト管理者にお問い合わせください。");
+          }
+        }
+
         // クリックイベント(検索)
         // $('.search__btn').click(function() {
         $('.search__btn').on('click', function() {
           inputText = $('.search__text__input').val();
-          currentText = inputText;
           page = 1;
-          RequestApi(currentText);
+          RequestApi();
         });
 
         // クリックイベント(pager)
@@ -179,7 +163,6 @@
           e.preventDefault();
           // disabledのクラスを読み取る
           if ($(this).hasClass('disabled')) {
-            // console.log("ボタンは非アクティブです。");
             return;
           } else {
             var $pagerButton = $(this).data('js');
@@ -194,7 +177,7 @@
               default:
                 return;
             }
-            RequestApi(currentText);
+            RequestApi();
           }
         });
       });
