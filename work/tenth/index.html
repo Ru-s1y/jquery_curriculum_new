@@ -77,16 +77,13 @@
 
         // ボタンの非アクティブ化処理
         function PagerButton(pageCount) {
-          // 総ページ数が1ページの場合disabled (page=1 && pageCount=1)
-          if (pageCount === 1) {
-            // console.log("1/1ページ");
-            $('.btn-item').addClass('disabled');
-          } else if (page === 1) {
-            // console.log("1ページ目:");
-            $('a[data-js="page-prev"]').addClass('disabled');
-          }　else if (page === pageCount) {
+          if (page === pageCount) {
             // console.log("最終ページ:");
             $('a[data-js="page-next"]').addClass('disabled');
+          } 
+          if (page === 1) {
+            // console.log("1ページ目:");
+            $('a[data-js="page-prev"]').addClass('disabled');
           }
         }
 
@@ -152,34 +149,57 @@
 
         // クリックイベント(検索)
         // $('.search__btn').click(function() {
-        $('.search__btn').on('click', function() {
-          inputText = $('.search__text__input').val();
+        $(document).on('click', '[data-js="search-btn"]', function() {
+          inputText = $('[data-js="search-word"]').val();
           page = 1;
           RequestApi();
         });
 
-        // クリックイベント(pager)
-        $('.container').on('click', '.btn-wrapper a', function(e) {
+        $(document).on('click', '[data-js="page-prev"]', function(e) {
           e.preventDefault();
-          // disabledのクラスを読み取る
           if ($(this).hasClass('disabled')) {
-            return;
+            return false;
           } else {
-            var $pagerButton = $(this).data('js');
-            switch($pagerButton) {
-              case 'page-prev':
-                page -= 1;
-                break;
-              case 'page-next':
-                page += 1;
-                break;
-              // ここにpagerボタンを追加していく
-              default:
-                return;
-            }
+            page--;
             RequestApi();
           }
         });
+
+        $(document).on('click', '[data-js="page-next"]', function(e) {
+          e.preventDefault();
+          if ($(this).hasClass('disabled')) {
+            return false;
+          } else {
+            page++;
+            RequestApi();
+          }
+        });
+
+        // クリックイベント(pager)
+        // $('.container').on('click', '.btn-wrapper a', function(e) {
+        //   e.preventDefault();
+        //   // disabledのクラスを読み取る
+        //   if ($(this).hasClass('disabled')) {
+        //     return;
+        //   } else {
+        //     var $pagerButton = $(this).data('js');
+        //     switch($pagerButton) {
+        //       case 'page-prev':
+        //         page -= 1;
+        //         break;
+        //       case 'page-next':
+        //         page += 1;
+        //         break;
+        //       // ここにpagerボタンを追加していく
+        //       default:
+        //         return;
+        //     }
+        //     RequestApi();
+        //   }
+        // });
+
+        // 
+        
       });
 
       // ----- コメント -----
