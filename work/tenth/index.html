@@ -87,12 +87,17 @@
           }
         }
 
-        // APIリクエスト
-        function RequestApi() {
-          // 初期化
+        // フィールドのクリア
+        function ClearField() {
           $('.message').children().remove();
           $('.lists').children().remove();
           $('.pager').remove();
+        }
+
+        // APIリクエスト
+        function RequestApi() {
+          // 初期化
+          ClearField();
 
           // Ajax通信
           $.ajax({
@@ -148,7 +153,6 @@
         }
 
         // クリックイベント(検索)
-        // $('.search__btn').click(function() {
         $(document).on('click', '[data-js="search-btn"]', function() {
           inputText = $('[data-js="search-word"]').val();
           page = 1;
@@ -174,32 +178,6 @@
             RequestApi();
           }
         });
-
-        // クリックイベント(pager)
-        // $('.container').on('click', '.btn-wrapper a', function(e) {
-        //   e.preventDefault();
-        //   // disabledのクラスを読み取る
-        //   if ($(this).hasClass('disabled')) {
-        //     return;
-        //   } else {
-        //     var $pagerButton = $(this).data('js');
-        //     switch($pagerButton) {
-        //       case 'page-prev':
-        //         page -= 1;
-        //         break;
-        //       case 'page-next':
-        //         page += 1;
-        //         break;
-        //       // ここにpagerボタンを追加していく
-        //       default:
-        //         return;
-        //     }
-        //     RequestApi();
-        //   }
-        // });
-
-        // 
-        
       });
 
       // ----- コメント -----
